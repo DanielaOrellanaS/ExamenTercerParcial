@@ -20,14 +20,16 @@ public class TurnoService {
     private final ClienteRepository clienteRepository;
     private final EjecutivoRepository ejecutivoRepository;
 
-    public TurnoService(TurnoRepository turnoRepository, ClienteRepository clienteRepository, EjecutivoRepository ejecutivoRepository) {
+    public TurnoService(TurnoRepository turnoRepository, ClienteRepository clienteRepository,
+            EjecutivoRepository ejecutivoRepository) {
         this.turnoRepository = turnoRepository;
         this.clienteRepository = clienteRepository;
-        this.ejecutivoRepository = ejecutivoRepository; 
+        this.ejecutivoRepository = ejecutivoRepository;
     }
 
-    public void crearTurno(String cedula, String nombreCompleto, Turno turno) {
+    public void crearTurnoAtencion(String cedula, String nombreCompleto) {
         Optional<Cliente> optCliente = this.clienteRepository.findByCedula(cedula);
+        Turno turno = new Turno();
         Integer numTurno = 0;
         try {
             if (optCliente.isPresent()) {
@@ -45,16 +47,18 @@ public class TurnoService {
         }
     }
 
-    public Turno iniciarAtencion(Integer numTurno, String idEjecutivo, Turno turno) {
+    public Turno iniciarAtencion(Integer numTurno, String idEjecutivo) {
         try {
+            Optional<Turno> optTurno = this.turnoRepository.findByNumTurno(numTurno);
             Optional<Ejecutivo> optEjecutivo = this.ejecutivoRepository.findById(idEjecutivo);
-            if (optEjecutivo.isPresent()) {
+            if (optEjecutivo.isPresent() && optTurno.isPresent()) {
                 Ejecutivo ejecutivo = optEjecutivo.get();
+                Turno turno = optTurno.get();
                 turno.setInicioAtencion(LocalDateTime.now());
                 turno.setCodigoEjecutivo(ejecutivo.getId());
                 turno.setNombreEjecutivo(ejecutivo.getNombreCompleto());
+                this.turnoRepository.save(turno);
             }
-            this.turnoRepository.save(turno);
         } catch (Exception e) {
             throw new RSRuntimeException("Ejecutivo no encontrado", RSCode.NOT_FOUND);
         }
@@ -64,10 +68,21 @@ public class TurnoService {
         Optional<Turno> objTurno = this.turnoRepository.findByNumTurno(numTurno);
         if (objTurno.isPresent()) {
             Turno turno = objTurno.get();
+            turno.setGeneracion(LocalDateTime.now());
             turno.setFinAtencion(LocalDateTime.now());
         } else {
             throw new RSRuntimeException("Turno no encontrado", RSCode.NOT_FOUND);
         }
     }
 
+    public void calificar(String cedula, Integer numTurno, Integer calificacion) {
+        Optional<Cliente> objCliente = this.clienteRepository.findByCedula(cedula);
+        Optional<Turno> objTurno = this.turnoRepository.findByNumTurno(numTurno);
+        if (objCliente.isPresent()) {
+            Turno turno = objTurno.get();
+            turno.setCalificacion(calificacion);
+        } else {
+            throw new RSRuntimeException("Cliente no encontrado", RSCode.NOT_FOUND);
+        }
+    }
 }
