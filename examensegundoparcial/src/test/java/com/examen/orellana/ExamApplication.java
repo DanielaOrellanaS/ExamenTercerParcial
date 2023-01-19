@@ -1,4 +1,4 @@
-package com.davidplayground.quizpractice;
+package com.examen.orellana;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
