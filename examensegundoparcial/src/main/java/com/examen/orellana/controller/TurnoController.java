@@ -15,8 +15,4 @@ public class TurnoController {
         this.turnoService = turnoService;
     } 
     
-    @PostMapping 
-    public ResponseEntity<RSTurno> generarTurno(
-        @RequestBody RQTurno
-    )
 }
