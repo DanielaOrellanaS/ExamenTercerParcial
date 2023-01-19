@@ -1,0 +1,3 @@
+# ExamneSegundoParcial 
+Nombre: Daniela Orellana 
+
